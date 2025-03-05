@@ -16,6 +16,18 @@
 
 
     <dependencies>
+
+        <!-- https://mvnrepository.com/artifact/org.mindrot/jbcrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+
+
+
+
         <!--Adding Javalin -->
         <!-- https://mvnrepository.com/artifact/io.javalin/javalin -->
         <dependency>

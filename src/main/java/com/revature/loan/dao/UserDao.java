@@ -16,7 +16,7 @@ public class UserDao {
     }
 
     public User createUser(User newUser) {
-        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+        String sql = "INSERT INTO users (name, email, password) VALUES (?, ?,?)";
 
         try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
              // Note: We request generated keys if needed
@@ -24,7 +24,8 @@ public class UserDao {
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, newUser.getName());
-            stmt.setString(2, newUser.getPassword());
+            stmt.setString(2, newUser.getEmail());
+            stmt.setString(3, newUser.getPassword());
 
             stmt.executeUpdate();
 
@@ -43,5 +44,30 @@ public class UserDao {
 
         // Return the updated User object (now containing its DB-assigned ID)
         return newUser;
+    }
+
+    public User getUserByUsername(String username) {
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("rol")
+
+
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
