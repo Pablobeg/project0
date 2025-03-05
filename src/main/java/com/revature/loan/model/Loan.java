@@ -6,6 +6,15 @@ public class Loan {
     public int quantity;
     public String status;
 
+    public Loan(){}
+
+    public Loan(int id, int idUser, int quantity, String status){
+        this.id=id;
+        this.idUser=idUser;
+        this.quantity=quantity;
+        this.status=status;
+    }
+
     public int getId() {
         return id;
     }
