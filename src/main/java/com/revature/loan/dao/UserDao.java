@@ -96,6 +96,45 @@ public class UserDao {
         return null;
     }
 
+    public User updateUser(int id, String name, String email) {
+        String updateSql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
+        String selectSql = "SELECT id, name, email, password, role FROM users WHERE id = ?";
+
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
+             PreparedStatement updateStmt = conn.prepareStatement(updateSql);
+             PreparedStatement selectStmt = conn.prepareStatement(selectSql)) {
+
+            // Updating user
+            updateStmt.setString(1, name);
+            updateStmt.setString(2, email);
+            updateStmt.setInt(3, id);
+            int rowsUpdated = updateStmt.executeUpdate();
+
+            // Checking if user exists
+            if (rowsUpdated == 0) {
+                return null;
+            }
+
+            // Getting data
+            selectStmt.setInt(1, id);
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("role")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 
 
 

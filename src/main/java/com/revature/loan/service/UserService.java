@@ -57,7 +57,14 @@ public class UserService {
         return null;
     }
 
+    public User updateUser(int id, String name, String email){
+        User updateUser = userDao.updateUser(id,name, email);
 
+        if(updateUser!=null){
+            return updateUser;
+        }
+        return null;
+    }
 
 
 }

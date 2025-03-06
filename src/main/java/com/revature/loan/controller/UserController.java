@@ -1,6 +1,7 @@
 package com.revature.loan.controller;
 
 import com.revature.loan.dto.UserAuthRequestDTO;
+import com.revature.loan.dto.UserUpdateDTO;
 import com.revature.loan.model.User;
 import com.revature.loan.service.UserService;
 import io.javalin.http.Context;
@@ -86,6 +87,10 @@ public class UserController {
         return session != null && session.getAttribute("user_id") != null;
     }
 
+    /**
+     * Handles get /users/{id}
+     */
+
     public void getUser(Context ctx){
         if (!checkSession(ctx)){
             ctx.status(400).json("{\"error\":\"No active session\"}");
@@ -124,6 +129,16 @@ public class UserController {
 
 
     }
+
+    /**
+     * Handles put /users/{id} with a JSON body:
+     * {
+     *    "username": "someName",
+     *    "email":"someEmail",
+     * }
+     */
+
+
     public void updateUser(Context ctx){
         if (!checkSession(ctx)){
             ctx.status(400).json("{\"error\":\"No active session\"}");
@@ -138,24 +153,34 @@ public class UserController {
         String role = (String) session.getAttribute("role");
         boolean isAdmin = role != null && role.equals("admin");
 
+
+
         //Checking if the current user is admin and if not block them
 
         if(!isAdmin && sessionUserId != userId){
-            ctx.status(403).json("{\\\"error\\\":\\\"Unauthorized access\\\"}");
+            ctx.status(403).json("{\"error\":\"Unauthorized access\"}");
             return;
         }
 
-        User user =userService.getUserById(userId);
+        //Body data to object
+        UserUpdateDTO userUpdate = ctx.bodyAsClass(UserUpdateDTO.class);
+
+        if (userUpdate.getName() == null || userUpdate.getEmail() == null) {
+            ctx.status(400).json("{\"error\":\"Missing username or email\"}");
+            return;
+        }
+
+        //Checking if user exist
+        User user = userService.getUserById(userId);
         if(user==null){
             ctx.status(404).json("{\"error\":\"User not found\"}");
-
+            return;
         }else{
-            UserAuthRequestDTO userDTO = new UserAuthRequestDTO();
-            userDTO.setUsername(user.getName());
-            userDTO.setEmail(user.getEmail());
-            userDTO.setPassword(user.getPassword());
 
-            ctx.json(userDTO);
+            //Passing data to user object
+            User newUser=userService.updateUser(userId, userUpdate.getName(), userUpdate.getEmail());
+
+            ctx.json(newUser);
         }
     }
 
