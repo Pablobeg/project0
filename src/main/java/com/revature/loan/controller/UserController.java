@@ -1,8 +1,11 @@
 package com.revature.loan.controller;
 
 import com.revature.loan.dto.UserAuthRequestDTO;
+import com.revature.loan.model.User;
 import com.revature.loan.service.UserService;
 import io.javalin.http.Context;
+import jakarta.servlet.http.HttpSession;
+
 public class UserController {
     private final UserService userService;
 
@@ -27,11 +30,55 @@ public class UserController {
             return;
         }
 
-        boolean success = userService.registerUser(req.getUsername(), req.getPassword(),req.getEmail());
+        boolean success = userService.registerUser(req.getUsername(), req.getEmail(), req.getPassword());
         if (success) {
             ctx.status(201).json("{\"message\":\"User registered successfully\"}");
         } else {
             ctx.status(409).json("{\"error\":\"Username already exists\"}");
         }
     }
+    /**
+     * Handles Post /auth/login with a JSON body:
+     * {
+     *    "username": "someName",
+     *    "email":"someEmail",
+     *    "password": "somePass"
+     * }
+     */
+
+    public void login(Context ctx){
+        UserAuthRequestDTO requestUser = ctx.bodyAsClass(UserAuthRequestDTO.class);
+        if (requestUser.getUsername() == null || requestUser.getPassword() == null || requestUser.getEmail()==null) {
+            ctx.status(400).json("{\"error\":\"Missing username, password or email\"}");
+        }
+
+        // Check credentials. dbUser makes it clear we got this data from the db after verifying with the requestUser.
+        boolean check= userService.loginUser(requestUser.getUsername(), requestUser.getEmail(), requestUser.getPassword());
+        if (!check) {
+            ctx.status(401).json("{\"error\":\"Invalid credentials\"}");
+            return;
+        }
+
+
+
+        // If valid, start a session
+        HttpSession session = ctx.req().getSession(true);
+        session.setAttribute("user", requestUser.getUsername());
+        ctx.status(200).json(requestUser);
+    }
+
+    public void logout(Context ctx) {
+        HttpSession session = ctx.req().getSession(false); // Obtener la sesión sin crear una nueva
+
+        if (session != null) {
+            session.invalidate(); // Close the session if there is one
+            ctx.status(200).json("{\"message\":\"Logged out\"}");
+        } else {
+            ctx.status(400).json("{\"error\":\"No active session\"}"); // If there is not session active
+        }
+    }
+
+
+
+
 }

@@ -46,12 +46,12 @@ public class UserDao {
         return newUser;
     }
 
-    public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE username = ?";
+    public User getUserByUsername(String name) {
+        String sql = "SELECT * FROM users WHERE name = ?";
         try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
+            stmt.setString(1, name);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return new User(
@@ -59,7 +59,7 @@ public class UserDao {
                             rs.getString("name"),
                             rs.getString("email"),
                             rs.getString("password"),
-                            rs.getString("rol")
+                            rs.getString("role")
 
 
                     );

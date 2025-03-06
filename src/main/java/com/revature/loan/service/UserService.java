@@ -2,6 +2,7 @@ package com.revature.loan.service;
 
 import com.revature.loan.dao.UserDao;
 import com.revature.loan.model.User;
+import jakarta.servlet.http.HttpSession;
 import org.mindrot.jbcrypt.BCrypt;
 
 
@@ -33,6 +34,20 @@ public class UserService {
         newUser.setEmail(email);
         userDao.createUser(newUser);
         return true;
+    }
+
+    public boolean loginUser(String username, String email ,String rawPassword){
+
+        User checkinUser = userDao.getUserByUsername(username);
+        //If user get data and password is the same with data base return true
+        if(checkinUser!=null && BCrypt.checkpw(rawPassword, checkinUser.getPassword())){
+            return true;
+        }
+        //comparing if checkingUser was null or password was incorrect return false
+        return false;
+
+
+
     }
 
 

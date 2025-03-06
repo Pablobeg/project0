@@ -47,6 +47,10 @@ public class Main {
             (144800,2),
             (51616,1);
             
+            INSERT INTO users(name, email, password, role)
+            VALUES
+            ('Bob', 'rene@email.com', 'ten','admin');
+            
             """;
 
     public static void main(String[] args) {
@@ -76,7 +80,9 @@ public class Main {
         }).start(7000);
 
         // 7) Define routes using the new {param} syntax
-        app.post("/register", userController::register);
+        app.post("/auth/register", userController::register);
+        app.post("/auth/login", userController::login);
+        app.post("/auth/logout",userController::logout);
 
 
     }
