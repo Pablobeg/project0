@@ -70,4 +70,33 @@ public class UserDao {
         }
         return null;
     }
+
+    public User getUserByID(int id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("id"),
+                            rs.getString("name"),
+                            rs.getString("email"),
+                            rs.getString("password"),
+                            rs.getString("role")
+
+
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+
 }

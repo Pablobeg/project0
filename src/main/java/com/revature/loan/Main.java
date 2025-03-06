@@ -28,6 +28,7 @@ public class Main {
             CREATE TABLE IF NOT EXISTS loans(
                 id SERIAL PRIMARY KEY,
                 quantity DECIMAL(10,2) NOT NULL CHECK (quantity > 0),
+                loanType VARCHAR(25),
                 status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
                 user_id INT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -49,7 +50,7 @@ public class Main {
             
             INSERT INTO users(name, email, password, role)
             VALUES
-            ('Bob', 'rene@email.com', 'ten','admin');
+            ('Bob', 'rene@email.com', '$2a$05$qyYlFip8gAeZ.cKLTn43de1YwGSSBpAyxptU6PFK0EkNxf4PNljMS','admin');
             
             """;
 
@@ -83,6 +84,8 @@ public class Main {
         app.post("/auth/register", userController::register);
         app.post("/auth/login", userController::login);
         app.post("/auth/logout",userController::logout);
+        app.get("/users/{id}", userController::getUser);
+        app.put("/users/{id}",userController::updateUser);
 
 
     }

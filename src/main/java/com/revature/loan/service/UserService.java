@@ -16,7 +16,7 @@ public class UserService {
 
     private String hashedPassword(String password){
         //Hashing the password with bcrypt
-        String hashedPass=BCrypt.hashpw(password,BCrypt.gensalt(12));
+        String hashedPass=BCrypt.hashpw(password,BCrypt.gensalt(5));
         return hashedPass;
     }
 
@@ -36,19 +36,28 @@ public class UserService {
         return true;
     }
 
-    public boolean loginUser(String username, String email ,String rawPassword){
+    public User loginUser(String username, String email ,String rawPassword){
 
         User checkinUser = userDao.getUserByUsername(username);
         //If user get data and password is the same with data base return true
         if(checkinUser!=null && BCrypt.checkpw(rawPassword, checkinUser.getPassword())){
-            return true;
+            return checkinUser;
         }
-        //comparing if checkingUser was null or password was incorrect return false
-        return false;
-
-
+        //comparing if checkingUser was null or password was incorrect return null
+        return null;
 
     }
+
+    public User getUserById(int id){
+        User userByID =userDao.getUserByID(id);
+        if(userByID!=null){
+            return userByID;
+        }
+
+        return null;
+    }
+
+
 
 
 }

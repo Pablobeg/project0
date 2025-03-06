@@ -53,8 +53,8 @@ public class UserController {
         }
 
         // Check credentials. dbUser makes it clear we got this data from the db after verifying with the requestUser.
-        boolean check= userService.loginUser(requestUser.getUsername(), requestUser.getEmail(), requestUser.getPassword());
-        if (!check) {
+        User check= userService.loginUser(requestUser.getUsername(), requestUser.getEmail(), requestUser.getPassword());
+        if (check ==null) {
             ctx.status(401).json("{\"error\":\"Invalid credentials\"}");
             return;
         }
@@ -63,7 +63,10 @@ public class UserController {
 
         // If valid, start a session
         HttpSession session = ctx.req().getSession(true);
-        session.setAttribute("user", requestUser.getUsername());
+
+        session.setAttribute("user_id", check.getId());  // Guardar el ID del usuario en la sesión
+        session.setAttribute("username", check.getName());
+        session.setAttribute("role", check.getRol());
         ctx.status(200).json(requestUser);
     }
 
@@ -75,6 +78,84 @@ public class UserController {
             ctx.status(200).json("{\"message\":\"Logged out\"}");
         } else {
             ctx.status(400).json("{\"error\":\"No active session\"}"); // If there is not session active
+        }
+    }
+
+    private static boolean checkSession(Context ctx) {
+        HttpSession session = ctx.req().getSession(false); // Don't creat a new session if doesn't exist
+        return session != null && session.getAttribute("user_id") != null;
+    }
+
+    public void getUser(Context ctx){
+        if (!checkSession(ctx)){
+            ctx.status(400).json("{\"error\":\"No active session\"}");
+            return;
+        }
+        //Getting id user from url
+        String id= ctx.pathParam("id");
+        int userId= Integer.parseInt(id);
+        //Getting id user, role from session actual
+        HttpSession session= ctx.req().getSession(false);
+        int sessionUserId= (int) session.getAttribute("user_id");
+        String role = (String) session.getAttribute("role");
+        boolean isAdmin = role != null && role.equals("admin");
+
+        //Checking if the current user is admin and if not block them
+
+        if(!isAdmin && sessionUserId != userId){
+            ctx.status(403).json("{\\\"error\\\":\\\"Unauthorized access\\\"}");
+            return;
+        }
+
+        User user =userService.getUserById(userId);
+        if(user==null){
+            ctx.status(404).json("{\"error\":\"User not found\"}");
+
+        }else{
+            UserAuthRequestDTO userDTO = new UserAuthRequestDTO();
+            userDTO.setUsername(user.getName());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setPassword(user.getPassword());
+
+            ctx.json(userDTO);
+        }
+
+
+
+
+    }
+    public void updateUser(Context ctx){
+        if (!checkSession(ctx)){
+            ctx.status(400).json("{\"error\":\"No active session\"}");
+            return;
+        }
+        //Getting id user from url
+        String id= ctx.pathParam("id");
+        int userId= Integer.parseInt(id);
+        //Getting id user, role from session actual
+        HttpSession session= ctx.req().getSession(false);
+        int sessionUserId= (int) session.getAttribute("user_id");
+        String role = (String) session.getAttribute("role");
+        boolean isAdmin = role != null && role.equals("admin");
+
+        //Checking if the current user is admin and if not block them
+
+        if(!isAdmin && sessionUserId != userId){
+            ctx.status(403).json("{\\\"error\\\":\\\"Unauthorized access\\\"}");
+            return;
+        }
+
+        User user =userService.getUserById(userId);
+        if(user==null){
+            ctx.status(404).json("{\"error\":\"User not found\"}");
+
+        }else{
+            UserAuthRequestDTO userDTO = new UserAuthRequestDTO();
+            userDTO.setUsername(user.getName());
+            userDTO.setEmail(user.getEmail());
+            userDTO.setPassword(user.getPassword());
+
+            ctx.json(userDTO);
         }
     }
 
