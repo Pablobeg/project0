@@ -1,5 +1,7 @@
 package com.revature.loan.controller;
 
+import com.revature.loan.dao.LoanDao;
+import com.revature.loan.dto.LoanDto;
 import com.revature.loan.dto.UserAuthRequestDTO;
 import com.revature.loan.dto.UserUpdateDTO;
 import com.revature.loan.model.User;
@@ -82,7 +84,7 @@ public class UserController {
         }
     }
 
-    private static boolean checkSession(Context ctx) {
+    public static boolean checkSession(Context ctx) {
         HttpSession session = ctx.req().getSession(false); // Don't creat a new session if doesn't exist
         return session != null && session.getAttribute("user_id") != null;
     }
@@ -133,7 +135,7 @@ public class UserController {
     /**
      * Handles put /users/{id} with a JSON body:
      * {
-     *    "username": "someName",
+     *    "name": "someName",
      *    "email":"someEmail",
      * }
      */
@@ -182,6 +184,43 @@ public class UserController {
 
             ctx.json(newUser);
         }
+    }
+
+    /**
+     * Handles post /loans/
+     * {
+     *    "quantity": "someQuantity",
+     *    "loanType":"someLoanType",
+
+     * }
+     */
+    public void createLoan(Context ctx){
+        if (!checkSession(ctx)){
+            ctx.status(400).json("{\"error\":\"No active session\"}");
+            return;
+        }
+
+        //Getting id from session actual
+        HttpSession session= ctx.req().getSession(false);
+        int sessionUserId= (int) session.getAttribute("user_id");
+        //Passing body as loanDto
+        LoanDto loanData= ctx.bodyAsClass(LoanDto.class);
+
+        if (loanData.getLoanType() == null || loanData.getQuantity() == 0) {
+            ctx.status(400).json("{\"error\":\"Missing type or quantity, loan can't be zero\"}");
+            return;
+        }
+
+      //  boolean success = userService.registerUser(req.getUsername(), req.getEmail(), req.getPassword());
+     /*   if (success) {
+            ctx.status(201).json("{\"message\":\"User registered successfully\"}");
+        } else {
+            ctx.status(409).json("{\"error\":\"Username already exists\"}");
+       }*/
+
+
+
+
     }
 
 

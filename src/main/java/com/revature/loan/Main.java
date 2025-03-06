@@ -86,6 +86,7 @@ public class Main {
         app.post("/auth/logout",userController::logout);
         app.get("/users/{id}", userController::getUser);
         app.put("/users/{id}",userController::updateUser);
+        app.post("/loans", userController::createLoan);
 
 
     }
