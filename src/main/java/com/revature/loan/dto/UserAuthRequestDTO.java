@@ -15,7 +15,11 @@ public class UserAuthRequestDTO {
     private String email;
     private String password;
 
+
+
+
     // Getters and setters
+
 
     public String getEmail() {
         return email;

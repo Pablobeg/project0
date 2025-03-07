@@ -1,8 +1,11 @@
 package com.revature.loan;
 
+import com.revature.loan.controller.LoanController;
 import com.revature.loan.controller.UserController;
+import com.revature.loan.dao.LoanDao;
 import com.revature.loan.dao.UserDao;
 import com.revature.loan.service.UserService;
+import com.revature.loan.service.LoanService;
 import io.javalin.Javalin;
 
 import java.sql.Connection;
@@ -27,8 +30,8 @@ public class Main {
             
             CREATE TABLE IF NOT EXISTS loans(
                 id SERIAL PRIMARY KEY,
-                quantity DECIMAL(10,2) NOT NULL CHECK (quantity > 0),
-                loanType VARCHAR(25),
+                quantity INT NOT NULL CHECK (quantity > 0),
+                loanType VARCHAR(25) NOT NULL DEFAULT 'borrow',
                 status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
                 user_id INT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -65,13 +68,14 @@ public class Main {
 
         // 5) Create DAOs, Services, Controllers
         UserDao userDao = new UserDao(jdbcUrl, dbUser, dbPassword);
-
+        LoanDao loanDao= new LoanDao(jdbcUrl, dbUser, dbPassword);
 
         UserService userService = new UserService(userDao);
-
+        LoanService loanService = new LoanService(loanDao);
 
         UserController userController = new UserController(userService);
 
+        LoanController loanController=new LoanController(loanService);
 
         // 6) Start Javalin (we will use Javalin version 4+)
         Javalin app = Javalin.create(config -> {
@@ -86,8 +90,12 @@ public class Main {
         app.post("/auth/logout",userController::logout);
         app.get("/users/{id}", userController::getUser);
         app.put("/users/{id}",userController::updateUser);
-        app.post("/loans", userController::createLoan);
-
+        app.post("/loans", loanController::createLoan);
+        app.get("loans", loanController::getAllLoans);
+        app.get("/loans/{loanId}", loanController::viewLoan);
+        app.put("/loans/{loanId}", loanController::updateLoan);
+        app.put("/loans/{loanId}/approve", loanController::approveLoan);
+        app.put("/loans/{loanId}/reject", loanController::rejectLoan);
 
     }
 

@@ -71,6 +71,11 @@ public class UserController {
         session.setAttribute("username", check.getName());
         session.setAttribute("role", check.getRol());
         ctx.status(200).json(requestUser);
+
+
+        ctx.status(200).json(requestUser);
+
+
     }
 
     public void logout(Context ctx) {
@@ -83,12 +88,31 @@ public class UserController {
             ctx.status(400).json("{\"error\":\"No active session\"}"); // If there is not session active
         }
     }
+    //Method to check sessions
 
     public static boolean checkSession(Context ctx) {
         HttpSession session = ctx.req().getSession(false); // Don't creat a new session if doesn't exist
         return session != null && session.getAttribute("user_id") != null;
     }
+    //Getting attributes from session
 
+    public static User getUserSession(Context ctx) {
+        HttpSession session = ctx.req().getSession(false);
+
+
+        Integer sessionUserId = (Integer) session.getAttribute("user_id");
+        String role = (String) session.getAttribute("role");
+        String name=  (String) session.getAttribute("name");
+
+        User userSession=new User();
+        userSession.setId(sessionUserId);
+        userSession.setRol(role);
+        userSession.setName(name);
+
+
+
+        return userSession;
+    }
     /**
      * Handles get /users/{id}
      */
@@ -102,14 +126,12 @@ public class UserController {
         String id= ctx.pathParam("id");
         int userId= Integer.parseInt(id);
         //Getting id user, role from session actual
-        HttpSession session= ctx.req().getSession(false);
-        int sessionUserId= (int) session.getAttribute("user_id");
-        String role = (String) session.getAttribute("role");
-        boolean isAdmin = role != null && role.equals("admin");
 
+        User userSession=getUserSession(ctx);
+        boolean isAdmin = userSession.getRol() != null && userSession.getRol().equals("admin");
         //Checking if the current user is admin and if not block them
 
-        if(!isAdmin && sessionUserId != userId){
+        if(!isAdmin && userSession.getId() != userId){
             ctx.status(403).json("{\\\"error\\\":\\\"Unauthorized access\\\"}");
             return;
         }
@@ -150,16 +172,16 @@ public class UserController {
         String id= ctx.pathParam("id");
         int userId= Integer.parseInt(id);
         //Getting id user, role from session actual
-        HttpSession session= ctx.req().getSession(false);
-        int sessionUserId= (int) session.getAttribute("user_id");
-        String role = (String) session.getAttribute("role");
-        boolean isAdmin = role != null && role.equals("admin");
+
+        User userSession= getUserSession(ctx);
+
+        boolean isAdmin = userSession.getRol() != null && userSession.getRol().equals("admin");
 
 
 
         //Checking if the current user is admin and if not block them
 
-        if(!isAdmin && sessionUserId != userId){
+        if(!isAdmin && userSession.getId() != userId){
             ctx.status(403).json("{\"error\":\"Unauthorized access\"}");
             return;
         }
@@ -186,42 +208,7 @@ public class UserController {
         }
     }
 
-    /**
-     * Handles post /loans/
-     * {
-     *    "quantity": "someQuantity",
-     *    "loanType":"someLoanType",
 
-     * }
-     */
-    public void createLoan(Context ctx){
-        if (!checkSession(ctx)){
-            ctx.status(400).json("{\"error\":\"No active session\"}");
-            return;
-        }
-
-        //Getting id from session actual
-        HttpSession session= ctx.req().getSession(false);
-        int sessionUserId= (int) session.getAttribute("user_id");
-        //Passing body as loanDto
-        LoanDto loanData= ctx.bodyAsClass(LoanDto.class);
-
-        if (loanData.getLoanType() == null || loanData.getQuantity() == 0) {
-            ctx.status(400).json("{\"error\":\"Missing type or quantity, loan can't be zero\"}");
-            return;
-        }
-
-      //  boolean success = userService.registerUser(req.getUsername(), req.getEmail(), req.getPassword());
-     /*   if (success) {
-            ctx.status(201).json("{\"message\":\"User registered successfully\"}");
-        } else {
-            ctx.status(409).json("{\"error\":\"Username already exists\"}");
-       }*/
-
-
-
-
-    }
 
 
 
