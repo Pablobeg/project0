@@ -3,6 +3,9 @@ package com.revature.loan.dao;
 import com.revature.loan.model.Loan;
 import com.revature.loan.model.User;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +15,7 @@ public class LoanDao {
     private final String jdbcUrl;
     private final String db;
     private final String password;
-
+    private static final Logger logger = LoggerFactory.getLogger(LoanDao.class);
     public LoanDao(String jdbcUrl, String db, String password) {
         this.jdbcUrl = jdbcUrl;
         this.db = db;
@@ -20,6 +23,7 @@ public class LoanDao {
     }
 
     public Loan createLoan(Loan newLoan) {
+        logger.info("Inserting loan to database: {}", newLoan);
         String sql = "INSERT INTO loans (quantity, loanType,user_id) VALUES (?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(jdbcUrl, db, password);
@@ -43,6 +47,7 @@ public class LoanDao {
             }
 
         } catch (SQLException e) {
+            logger.error("Error in loan: {}", e.getMessage());
             e.printStackTrace();
         }
 
