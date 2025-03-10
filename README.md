@@ -30,11 +30,11 @@ This will generate a .jar file inside the target/ directory.
 Database Connection / Configuration
 
 You need to manually update the following values in the source code to connect to your own PostgreSQL database:
-
+```
 String url = "jdbc:postgresql://localhost:5432/your_database_name";
 String user = "your_username";
 String password = "your_password";
-
+```
 # Running Unit Tests
 
 To run the unit tests included in the project, simply execute:
